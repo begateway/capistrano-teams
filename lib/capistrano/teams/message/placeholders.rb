@@ -5,7 +5,8 @@ module Message
   class Placeholders
     attr_reader :placeholders
 
-    def initialize(placeholders)
+    def initialize(cap_instance, placeholders)
+      @cap = cap_instance
       @placeholders = defaults.merge(placeholders)
     end
 
@@ -13,10 +14,10 @@ module Message
 
     def defaults
       {
-        application: fetch(:application, fetch(:teams_default_application)),
-        branch: fetch(:branch, fetch(:teams_default_branch)),
-        stage: fetch(:stage, :teams_default_stage),
-        user: ENV.fetch('USER', ENV.fetch('USERNAME', :teams_default_user))
+        application: @cap.fetch(:application, @cap.fetch(:teams_default_application)),
+        branch: @cap.fetch(:branch, @cap.fetch(:teams_default_branch)),
+        stage: @cap.fetch(:stage, :teams_default_stage),
+        user: ENV.fetch('USER', ENV.fetch('USERNAME', @cap.fetch(:teams_default_user)))
       }
     end
   end

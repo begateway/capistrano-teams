@@ -7,12 +7,12 @@ module Message
   TYPE_CARD = 2
   # Message builder class
   class Builder
-    def self.of_type(type, placeholder_list, theme_color, facts)
+    def self.of_type(cap_instance, type, placeholder_list, theme_color, facts)
       case type
       when Message::TYPE_BASIC
-        Basic.new(placeholder_list, theme_color, facts)
+        Basic.new(cap_instance, placeholder_list, theme_color, facts)
       when Message::TYPE_CARD
-        MessageCard.new(placeholder_list, theme_color, facts)
+        MessageCard.new(cap_instance, placeholder_list, theme_color, facts)
       else
         raise 'Capistrano Teams: Unknown message type'
       end
@@ -21,14 +21,15 @@ module Message
 
   # Type
   class Type
-    def initialize(placeholder_list, theme_color, facts = [])
+    def initialize(cap_instance, placeholder_list, theme_color, facts = [])
+      @cap = cap_instance
       @placeholder_list = placeholder_list
       @theme_color = theme_color
       @facts = facts
     end
 
     def placeholders
-      Message::Placeholders.new(@placeholder_list).placeholders
+      Message::Placeholders.new(@cap, @placeholder_list).placeholders
     end
 
     def content
@@ -41,8 +42,8 @@ module Message
     # Get the body of the POST message as JSON.
     def content
       {
-        title: fetch(:teams_basic_message_title),
-        text: fetch(:teams_basic_message_text),
+        title: @cap.fetch(:teams_basic_message_title),
+        text: @cap.fetch(:teams_basic_message_text),
         themeColor: @theme_color
       }.to_json % placeholders
     end
@@ -56,7 +57,7 @@ module Message
         '@type' => 'MessageCard',
         '@context' => 'http://schema.org/extensions',
         'themeColor' => @theme_color,
-        'summary' => fetch(:teams_card_message_summary),
+        'summary' => @cap.fetch(:teams_card_message_summary),
         'sections' => sections,
         'potentialAction' => []
       }.to_json % placeholders
@@ -66,11 +67,11 @@ module Message
 
     def sections
       [{
-        'activityTitle' => fetch(:teams_card_message_title),
-        'activitySubtitle' => fetch(:teams_card_message_sub_title),
-        'activityImage' => fetch(:teams_card_message_image),
+        'activityTitle' => @cap.fetch(:teams_card_message_title),
+        'activitySubtitle' => @cap.fetch(:teams_card_message_sub_title),
+        'activityImage' => @cap.fetch(:teams_card_message_image),
         'facts' => facts,
-        'markdown' => fetch(:teams_card_message_markdown)
+        'markdown' => @cap.fetch(:teams_card_message_markdown)
       }]
     end
 

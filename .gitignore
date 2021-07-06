@@ -13,6 +13,7 @@ test/version_tmp
 *.o
 *.a
 mkmf.log
+.tags*
 
 /.bundle/
 /.yardoc
